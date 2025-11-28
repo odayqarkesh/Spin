@@ -228,12 +228,13 @@ input:focus{ outline:none; border-color:#667eea; box-shadow:0 0 10px rgba(102,12
     border: 8px solid #333;
     transition: transform 4s cubic-bezier(0.17, 0.89, 0.32, 0.98);
     transform: rotate(0deg);
+    /* تدرجات ألوان جديدة */
     background: conic-gradient(
-        #e74c3c 0deg 72deg,
-        #27ae60 72deg 144deg,
-        #3498db 144deg 216deg,
-        #f1c40f 216deg 288deg,
-        #8e44ad 288deg 360deg
+        #e74c3c 0deg 72deg,    /* الكبرى (أحمر) */
+        #f39c12 72deg 144deg,   /* المميزة (برتقالي) */
+        #27ae60 144deg 216deg,  /* الجيدة (أخضر) */
+        #3498db 216deg 288deg,  /* المتوسطة (أزرق) */
+        #8e44ad 288deg 360deg   /* الصغيرة (بنفسجي) */
     );
     display:flex;
     align-items:center;
@@ -301,19 +302,18 @@ input:focus{ outline:none; border-color:#667eea; box-shadow:0 0 10px rgba(102,12
 }
 .spin-btn:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
 .spin-btn:disabled{ opacity:0.5; cursor:not-allowed; }
-.export-btn{ background: linear-gradient(45deg,#27ae60,#229954); color:white; border:none; padding:12px 22px; border-radius:16px; cursor:pointer; font-size: 16px; }
 
-/* نتيجة الفوز */
+/* نتيجة الفوز (محدثة للكلاسات الجديدة) */
 .result{
     margin: 25px 0;
     padding:16px; border-radius:12px; font-size:clamp(18px,2.2vw,26px);
     font-weight:bold; min-height:65px; display:flex; align-items:center; justify-content:center;
 }
-.result.win-50{ background: linear-gradient(45deg,#e74c3c,#c0392b); color:#fff; }
-.result.win-25{ background: linear-gradient(45deg,#3498db,#2980b9); color:#fff; }
-.result.win-sunshade{ background: linear-gradient(45deg,#27ae60,#229954); color:#fff; }
-.result.win-cup{ background: linear-gradient(45deg,#f1c40f,#f39c12); color:#111; }
-.result.win-water{ background: linear-gradient(45deg,#00bcd4,#0097a7); color:#fff; }
+.result.win-50{ background: linear-gradient(45deg,#e74c3c,#c0392b); color:#fff; }   /* الكبرى (50, 45) */
+.result.win-40{ background: linear-gradient(45deg,#f39c12,#e67e22); color:#fff; }   /* المميزة (40, 35) */
+.result.win-30{ background: linear-gradient(45deg,#27ae60,#229954); color:#fff; }                 /* الجيدة (30, 25) */
+.result.win-20{ background: linear-gradient(45deg,#3498db,#2980b9); color:#fff; }                       /* المتوسطة (20) */
+.result.win-10{ background: linear-gradient(45deg,#8e44ad,#9b59b6); color:#fff; }                         /* الصغيرة (15, 10) */
 
 /* قسم الإحصائيات */
 .stats {
