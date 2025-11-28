@@ -228,20 +228,24 @@ input:focus{ outline:none; border-color:#667eea; box-shadow:0 0 10px rgba(102,12
     border: 8px solid #333;
     transition: transform 4s cubic-bezier(0.17, 0.89, 0.32, 0.98);
     transform: rotate(0deg);
-    /* تدرجات ألوان جديدة */
+    /* 9 قطاعات متساوية: 40 درجة لكل منها */
     background: conic-gradient(
-        #e74c3c 0deg 72deg,    /* الكبرى (أحمر) */
-        #f39c12 72deg 144deg,   /* المميزة (برتقالي) */
-        #27ae60 144deg 216deg,  /* الجيدة (أخضر) */
-        #3498db 216deg 288deg,  /* المتوسطة (أزرق) */
-        #8e44ad 288deg 360deg   /* الصغيرة (بنفسجي) */
+        #c0392b 0deg 40deg,      /* 50 شيكل (أحمر داكن) */
+        #e74c3c 40deg 80deg,     /* 45 شيكل (أحمر) */
+        #e67e22 80deg 120deg,    /* 40 شيكل (برتقالي داكن) */
+        #f39c12 120deg 160deg,   /* 35 شيكل (برتقالي) */
+        #27ae60 160deg 200deg,   /* 30 شيكل (أخضر) */
+        #2ecc71 200deg 240deg,   /* 25 شيكل (أخضر فاتح) */
+        #3498db 240deg 280deg,   /* 20 شيكل (أزرق) */
+        #5d8aa8 280deg 320deg,   /* 15 شيكل (أزرق رمادي) */
+        #8e44ad 320deg 360deg    /* 10 شيكل (بنفسجي) */
     );
     display:flex;
     align-items:center;
     justify-content:center;
 }
 
-/* تموضع جديد لتسميات القطاعات (للتوسيط الدقيق) */
+/* تموضع جديد لتسميات القطاعات (9 قطاعات) */
 .segment-label{
     position:absolute;
     width: 50%;
@@ -262,18 +266,27 @@ input:focus{ outline:none; border-color:#667eea; box-shadow:0 0 10px rgba(102,12
     align-items: center;
     padding-top: 15px;
 }
-.label-1 { transform: rotate(36deg); }
-.label-2 { transform: rotate(108deg); }
-.label-3 { transform: rotate(180deg); }
-.label-4 { transform: rotate(252deg); }
-.label-5 { transform: rotate(324deg); }
+/* زاوية التدوير = زاوية المنتصف (startAngle + 20) */
+.label-1 { transform: rotate(20deg); }    /* 50 شيكل */
+.label-2 { transform: rotate(60deg); }    /* 45 شيكل */
+.label-3 { transform: rotate(100deg); }   /* 40 شيكل */
+.label-4 { transform: rotate(140deg); }   /* 35 شيكل */
+.label-5 { transform: rotate(180deg); }   /* 30 شيكل */
+.label-6 { transform: rotate(220deg); }   /* 25 شيكل */
+.label-7 { transform: rotate(260deg); }   /* 20 شيكل */
+.label-8 { transform: rotate(300deg); }   /* 15 شيكل */
+.label-9 { transform: rotate(340deg); }   /* 10 شيكل */
 
 /* تدوير المحتوى الداخلي ليبقى مستقيماً */
-.label-1 > div { transform: rotate(-36deg); }
-.label-2 > div { transform: rotate(-108deg); }
-.label-3 > div { transform: rotate(-180deg); }
-.label-4 > div { transform: rotate(-252deg); }
-.label-5 > div { transform: rotate(-324deg); }
+.label-1 > div { transform: rotate(-20deg); }
+.label-2 > div { transform: rotate(-60deg); }
+.label-3 > div { transform: rotate(-100deg); }
+.label-4 > div { transform: rotate(-140deg); }
+.label-5 > div { transform: rotate(-180deg); }
+.label-6 > div { transform: rotate(-220deg); }
+.label-7 > div { transform: rotate(-260deg); }
+.label-8 > div { transform: rotate(-300deg); }
+.label-9 > div { transform: rotate(-340deg); }
 
 /* أيقونات ونص داخل كل تسمية */
 .seg-icon{ font-size: clamp(20px, 3vw, 28px); }
@@ -303,17 +316,22 @@ input:focus{ outline:none; border-color:#667eea; box-shadow:0 0 10px rgba(102,12
 .spin-btn:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
 .spin-btn:disabled{ opacity:0.5; cursor:not-allowed; }
 
-/* نتيجة الفوز (محدثة للكلاسات الجديدة) */
+/* نتيجة الفوز (كلاسات جديدة لكل جائزة) */
 .result{
     margin: 25px 0;
     padding:16px; border-radius:12px; font-size:clamp(18px,2.2vw,26px);
     font-weight:bold; min-height:65px; display:flex; align-items:center; justify-content:center;
+    color: #fff;
 }
-.result.win-50{ background: linear-gradient(45deg,#e74c3c,#c0392b); color:#fff; }   /* الكبرى (50, 45) */
-.result.win-40{ background: linear-gradient(45deg,#f39c12,#e67e22); color:#fff; }   /* المميزة (40, 35) */
-.result.win-30{ background: linear-gradient(45deg,#27ae60,#229954); color:#fff; }                 /* الجيدة (30, 25) */
-.result.win-20{ background: linear-gradient(45deg,#3498db,#2980b9); color:#fff; }                       /* المتوسطة (20) */
-.result.win-10{ background: linear-gradient(45deg,#8e44ad,#9b59b6); color:#fff; }                         /* الصغيرة (15, 10) */
+.result.win-50{ background: linear-gradient(45deg,#c0392b,#9e2a1e); }   
+.result.win-45{ background: linear-gradient(45deg,#e74c3c,#c0392b); }
+.result.win-40{ background: linear-gradient(45deg,#e67e22,#d35400); }
+.result.win-35{ background: linear-gradient(45deg,#f39c12,#e67e22); }
+.result.win-30{ background: linear-gradient(45deg,#27ae60,#229954); }
+.result.win-25{ background: linear-gradient(45deg,#2ecc71,#27ae60); }
+.result.win-20{ background: linear-gradient(45deg,#3498db,#2980b9); }
+.result.win-15{ background: linear-gradient(45deg,#5d8aa8,#4e729a); }
+.result.win-10{ background: linear-gradient(45deg,#8e44ad,#9b59b6); }
 
 /* قسم الإحصائيات */
 .stats {
