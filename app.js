@@ -29,14 +29,18 @@ let gameData = {
 // ===== رابط Google Apps Script URL (لم يتغير) =====
 const googleAppsScriptURL = 'https://script.google.com/macros/s/AKfycbxZ7NtD5UqDnwiQzbqUNP4zpbWzA6NIGyBgzGiDGX_UK2xlZoHWNyKSaR6j_XFl0g/exec';
 
-// ===== تعريف القطاعات (العرض المرئي) =====
-// الكلاسات والألوان تعكس مجموعة من الجوائز لتبسيط العرض.
+// ===== تعريف القطاعات (9 قطاعات متساوية - 40 درجة لكل قطاع) =====
+// كل قطاع يمثل جائزة نقدية واحدة
 const segments = [
-    { name: '💰 الكبرى', icon: '💰', class: 'win-50', startAngle: 0, endAngle: 72, stopAngle: 36, winnable: true },      
-    { name: '💵 المميزة', icon: '💵', class: 'win-40', startAngle: 72, endAngle: 144, stopAngle: 108, winnable: true },   
-    { name: '💸 الجيدة', icon: '💸', class: 'win-30', startAngle: 144, endAngle: 216, stopAngle: 180, winnable: true },    
-    { name: '🎁 المتوسطة', icon: '🎁', class: 'win-20', startAngle: 216, endAngle: 288, stopAngle: 252, winnable: true },   
-    { name: '🪙 الصغيرة', icon: '🪙', class: 'win-10', startAngle: 288, endAngle: 360, stopAngle: 324, winnable: true } 
+    { name: '50 شيكل', key: 'prize50', icon: '💵', class: 'win-50', startAngle: 0, endAngle: 40, stopAngle: 20 },
+    { name: '45 شيكل', key: 'prize45', icon: '💵', class: 'win-45', startAngle: 40, endAngle: 80, stopAngle: 60 },
+    { name: '40 شيكل', key: 'prize40', icon: '💵', class: 'win-40', startAngle: 80, endAngle: 120, stopAngle: 100 },
+    { name: '35 شيكل', key: 'prize35', icon: '💵', class: 'win-35', startAngle: 120, endAngle: 160, stopAngle: 140 },
+    { name: '30 شيكل', key: 'prize30', icon: '💵', class: 'win-30', startAngle: 160, endAngle: 200, stopAngle: 180 },
+    { name: '25 شيكل', key: 'prize25', icon: '💵', class: 'win-25', startAngle: 200, endAngle: 240, stopAngle: 220 },
+    { name: '20 شيكل', key: 'prize20', icon: '💵', class: 'win-20', startAngle: 240, endAngle: 280, stopAngle: 260 },
+    { name: '15 شيكل', key: 'prize15', icon: '💵', class: 'win-15', startAngle: 280, endAngle: 320, stopAngle: 300 },
+    { name: '10 شيكل', key: 'prize10', icon: '💵', class: 'win-10', startAngle: 320, endAngle: 360, stopAngle: 340 }
 ];
 
 // ===== عناصر DOM =====
@@ -50,7 +54,7 @@ document.addEventListener('DOMContentLoaded', function() {
     updateStats();
 });
 
-// ===== دوال التحقق والرسائل =====
+// ===== دوال التحقق والرسائل (تبقى كما هي) =====
 function validateInput() {
     const id = document.getElementById('playerId').value.trim();
     const phone = document.getElementById('playerPhone').value.trim();
@@ -77,7 +81,7 @@ function showSuccess(message) {
     successDiv.style.display = 'block';
 }
 
-// ===== مؤثر confetti =====
+// ===== مؤثر confetti (يبقى كما هو) =====
 function createConfetti() {
     const colors = ['#27ae60','#3498db','#f1c40f','#e74c3c'];
     for (let i=0; i<80; i++){
@@ -98,10 +102,10 @@ function startSpin() {
     spinBtn.disabled = true;
     resultDiv.style.display = 'none';
 
-    // 1. تحديد الجائزة الفائزة من الجوائز المتبقية
+    // 1. تحديد الجائزة الفائزة من الجوائز المتبقية (الاحتمالية)
     let availablePrizes = [];
     for (const prizeKey in gameData.prizes) {
-        // نكرر المفتاح بعدد الجوائز المتبقية
+        // نكرر المفتاح بعدد الجوائز المتبقية لتمثيل احتمالية الفوز
         for (let i = 0; i < gameData.prizes[prizeKey]; i++) {
             availablePrizes.push(prizeKey);
         }
@@ -113,26 +117,18 @@ function startSpin() {
         return;
     }
 
-    // يتم اختيار الجائزة بناءً على عددها المتبقي (احتمالية أعلى للجوائز ذات الكمية الأكبر)
+    // يتم اختيار الجائزة بناءً على عددها المتبقي
     const selectedPrizeKey = availablePrizes[Math.floor(Math.random() * availablePrizes.length)];
     const selectedPrizeName = gameData.prizeMap[selectedPrizeKey];
 
-    // 2. توجيه العجلة لتقف عند قطاع يمثل هذه الجائزة (لغرض العرض المرئي)
-    let visualSegment;
-    // منطق توجيه تقريبي:
-    if (['prize45', 'prize50'].includes(selectedPrizeKey)) {
-        visualSegment = segments[0]; // الكبرى (50, 45)
-    } else if (['prize35', 'prize40'].includes(selectedPrizeKey)) {
-        visualSegment = segments[1]; // المميزة (40, 35)
-    } else if (['prize25', 'prize30'].includes(selectedPrizeKey)) {
-        visualSegment = segments[2]; // الجيدة (30, 25)
-    } else if (['prize20'].includes(selectedPrizeKey)) {
-        visualSegment = segments[3]; // المتوسطة (20)
-    } else if (['prize10', 'prize15'].includes(selectedPrizeKey)) {
-        visualSegment = segments[4]; // الصغيرة (15, 10)
-    } else {
-        // اختيار عشوائي إذا لم يتم التحديد
-        visualSegment = segments[Math.floor(Math.random() * segments.length)];
+    // 2. توجيه العجلة لتقف عند القطاع الصحيح المرئي
+    const visualSegment = segments.find(s => s.key === selectedPrizeKey);
+
+    if (!visualSegment) {
+        // هذا يجب ألا يحدث أبداً في هذا الإعداد
+        showError('خطأ داخلي: لم يتم العثور على قطاع مرئي للجائزة.');
+        spinBtn.disabled = false;
+        return;
     }
     
     // حساب زاوية الدوران لتقف عند القطاع المختار
@@ -140,8 +136,8 @@ function startSpin() {
     const stopAngle = 360 - visualSegment.stopAngle;
     const totalRotation = baseRotations + stopAngle;
 
-    // إضافة تغيير طفيف عشوائي (+/- 10 درجات) لجعل الوقوف يبدو واقعياً داخل القطاع
-    const randomOffset = Math.floor(Math.random() * 20) - 10;
+    // إضافة تغيير طفيف عشوائي (+/- 15 درجات) لجعل الوقوف يبدو واقعياً داخل القطاع (40 درجة عرض القطاع)
+    const randomOffset = Math.floor(Math.random() * 30) - 15;
     const finalRotation = totalRotation + randomOffset;
 
     wheel.style.transition = 'none';
@@ -165,7 +161,7 @@ function startSpin() {
         
         // خصم الجائزة
         gameData.prizes[selectedPrizeKey]--;
-        createConfetti(); // تفعيل المؤثر لكل فوز
+        createConfetti(); 
 
         updateStats();
 
@@ -178,7 +174,6 @@ function startSpin() {
 
 // عرض النتيجة المعدلة لتعرض الجائزة الفعلية وليس اسم القطاع
 function showActualResult(prizeName, segmentClass, icon) {
-    // يمكننا استخدام أيقونة القطاع المرئي ولكن عرض اسم الجائزة الفعلي
     resultDiv.innerHTML = `${icon} ${prizeName} ${icon}`;
     resultDiv.className = `result ${segmentClass}`;
     resultDiv.style.display = 'flex';
