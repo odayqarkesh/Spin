@@ -12,16 +12,9 @@ let gameData = {
         prize45: 45,       // 45 شيكل * 1 مرة = 45
         prize50: 50,       // 50 شيكل * 1 مرة = 50
     },
-    // قائمة لربط اسم الجائزة في الكود باسمها الظاهر
     prizeMap: {
-        prize10: '10 شيكل',
-        prize15: '15 شيكل',
-        prize20: '20 شيكل',
-        prize25: '25 شيكل',
-        prize30: '30 شيكل',
-        prize35: '35 شيكل',
-        prize40: '40 شيكل',
-        prize45: '45 شيكل',
+        prize10: '10 شيكل', prize15: '15 شيكل', prize20: '20 شيكل', prize25: '25 شيكل',
+        prize30: '30 شيكل', prize35: '35 شيكل', prize40: '40 شيكل', prize45: '45 شيكل',
         prize50: '50 شيكل'
     }
 };
@@ -30,7 +23,6 @@ let gameData = {
 const googleAppsScriptURL = 'https://script.google.com/macros/s/AKfycbxZ7NtD5UqDnwiQzbqUNP4zpbWzA6NIGyBgzGiDGX_UK2xlZoHWNyKSaR6j_XFl0g/exec';
 
 // ===== تعريف القطاعات (9 قطاعات متساوية - 40 درجة لكل قطاع) =====
-// كل قطاع يمثل جائزة نقدية واحدة
 const segments = [
     { name: '50 شيكل', key: 'prize50', icon: '💵', class: 'win-50', startAngle: 0, endAngle: 40, stopAngle: 20 },
     { name: '45 شيكل', key: 'prize45', icon: '💵', class: 'win-45', startAngle: 40, endAngle: 80, stopAngle: 60 },
@@ -54,16 +46,18 @@ document.addEventListener('DOMContentLoaded', function() {
     updateStats();
 });
 
-// ===== دوال التحقق والرسائل (تبقى كما هي) =====
+// ===== دوال التحقق والرسائل (تم التعديل لإضافة اسم الموظف) =====
 function validateInput() {
     const id = document.getElementById('playerId').value.trim();
     const phone = document.getElementById('playerPhone').value.trim();
+    const employeeName = document.getElementById('employeeName').value.trim(); // === حقل جديد ===
 
     document.getElementById('errorMsg').style.display = 'none';
     document.getElementById('successMsg').style.display = 'none';
 
     if (!/^\d{9}$/.test(id)) { showError('يجب أن يكون رقم الهوية 9 أرقام فقط'); return false; }
     if (!/^05\d{8}$/.test(phone)) { showError('يجب أن يكون رقم الهاتف 10 أرقام ويبدأ بـ 05'); return false; }
+    if (employeeName.length < 2) { showError('الرجاء إدخال اسم الموظف بشكل صحيح'); return false; } // === تحقق جديد ===
     if (gameData.playedIds.has(id)) { showError('هذا الرقم قد لعب مسبقاً'); return false; }
 
     return true;
@@ -81,7 +75,7 @@ function showSuccess(message) {
     successDiv.style.display = 'block';
 }
 
-// ===== مؤثر confetti (يبقى كما هو) =====
+// ... (دالة createConfetti لا تحتاج لتعديل) ...
 function createConfetti() {
     const colors = ['#27ae60','#3498db','#f1c40f','#e74c3c'];
     for (let i=0; i<80; i++){
@@ -95,7 +89,8 @@ function createConfetti() {
     }
 }
 
-// ===== وظيفة بدء الدوران (المنطق المعدل) =====
+
+// ===== وظيفة بدء الدوران (تم التعديل لإضافة اسم الموظف) =====
 function startSpin() {
     if (!validateInput()) return;
 
@@ -105,7 +100,6 @@ function startSpin() {
     // 1. تحديد الجائزة الفائزة من الجوائز المتبقية (الاحتمالية)
     let availablePrizes = [];
     for (const prizeKey in gameData.prizes) {
-        // نكرر المفتاح بعدد الجوائز المتبقية لتمثيل احتمالية الفوز
         for (let i = 0; i < gameData.prizes[prizeKey]; i++) {
             availablePrizes.push(prizeKey);
         }
@@ -117,26 +111,16 @@ function startSpin() {
         return;
     }
 
-    // يتم اختيار الجائزة بناءً على عددها المتبقي
     const selectedPrizeKey = availablePrizes[Math.floor(Math.random() * availablePrizes.length)];
     const selectedPrizeName = gameData.prizeMap[selectedPrizeKey];
 
     // 2. توجيه العجلة لتقف عند القطاع الصحيح المرئي
     const visualSegment = segments.find(s => s.key === selectedPrizeKey);
-
-    if (!visualSegment) {
-        // هذا يجب ألا يحدث أبداً في هذا الإعداد
-        showError('خطأ داخلي: لم يتم العثور على قطاع مرئي للجائزة.');
-        spinBtn.disabled = false;
-        return;
-    }
+    if (!visualSegment) { showError('خطأ داخلي: لم يتم العثور على قطاع مرئي للجائزة.'); spinBtn.disabled = false; return; }
     
-    // حساب زاوية الدوران لتقف عند القطاع المختار
     const baseRotations = 5 * 360;
-    const stopAngle = 360 - visualSegment.stopAngle;
+    const stopAngle = 360 - visualSegment.stopAngle; 
     const totalRotation = baseRotations + stopAngle;
-
-    // إضافة تغيير طفيف عشوائي (+/- 15 درجات) لجعل الوقوف يبدو واقعياً داخل القطاع (40 درجة عرض القطاع)
     const randomOffset = Math.floor(Math.random() * 30) - 15;
     const finalRotation = totalRotation + randomOffset;
 
@@ -149,15 +133,17 @@ function startSpin() {
     }, 50);
 
     setTimeout(() => {
-        // عرض النتيجة الفعلية (اسم الجائزة من prizeMap)
+        // عرض النتيجة
         showActualResult(selectedPrizeName, visualSegment.class, visualSegment.icon);
 
         const id = document.getElementById('playerId').value.trim();
         const phone = document.getElementById('playerPhone').value.trim();
+        const employeeName = document.getElementById('employeeName').value.trim(); // === جلب القيمة الجديدة ===
         const timestamp = getGregorianNow();
 
         gameData.playedIds.add(id);
-        sendToGoogleSheets(id, phone, selectedPrizeName, timestamp);
+        // === إرسال القيمة الجديدة ===
+        sendToGoogleSheets(id, phone, selectedPrizeName, timestamp, employeeName);
         
         // خصم الجائزة
         gameData.prizes[selectedPrizeKey]--;
@@ -167,12 +153,13 @@ function startSpin() {
 
         document.getElementById('playerId').value = '';
         document.getElementById('playerPhone').value = '';
+        document.getElementById('employeeName').value = ''; // === تفريغ حقل اسم الموظف ===
         spinBtn.disabled = false;
 
     }, 4200);
 }
 
-// عرض النتيجة المعدلة لتعرض الجائزة الفعلية وليس اسم القطاع
+// عرض النتيجة
 function showActualResult(prizeName, segmentClass, icon) {
     resultDiv.innerHTML = `${icon} ${prizeName} ${icon}`;
     resultDiv.className = `result ${segmentClass}`;
@@ -190,9 +177,11 @@ function updateStats() {
     }
 }
 
-// ===== دالة الإرسال (بدون تغيير) =====
-function sendToGoogleSheets(id, phone, prize, timestamp) {
-    const data = { id, phone, prize, timestamp };
+// ===== دالة الإرسال (تم التعديل لتضمين اسم الموظف) =====
+function sendToGoogleSheets(id, phone, prize, timestamp, employeeName) {
+    // === إضافة employeeName إلى كائن البيانات المرسل ===
+    const data = { id, phone, prize, timestamp, employeeName }; 
+    // ===============================================
     
     fetch(googleAppsScriptURL, {
         method: 'POST',
