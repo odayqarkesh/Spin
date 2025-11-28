@@ -1,24 +1,42 @@
-// ===== بيانات اللعبة (معدّلة حسب القواعد الجديدة) =====
+// ===== بيانات اللعبة (محدثة بالكميات الجديدة) =====
 let gameData = {
     playedIds: new Set(),
     prizes: {
-        prize25: 10,      // 10 فائزين * 25 شيكل = 250 شيكل
-        prize50: 2,       // 2 فائزين * 50 شيكل = 100 شيكل
-        cup: 50,          // 50 كأس كحد أقصى
-        sunShade: 10      // 10 شمسية سيارة كحد أقصى
+        prize10: 100,      // 10 شيكل * 10 مرات = 100
+        prize15: 150,      // 15 شيكل * 10 مرات = 150
+        prize20: 200,      // 20 شيكل * 10 مرات = 200
+        prize25: 150,      // 25 شيكل * 6 مرات = 150
+        prize30: 150,      // 30 شيكل * 5 مرات = 150
+        prize35: 70,       // 35 شيكل * 2 مرات = 70
+        prize40: 80,       // 40 شيكل * 2 مرات = 80
+        prize45: 45,       // 45 شيكل * 1 مرة = 45
+        prize50: 50,       // 50 شيكل * 1 مرة = 50
+    },
+    // قائمة لربط اسم الجائزة في الكود باسمها الظاهر
+    prizeMap: {
+        prize10: '10 شيكل',
+        prize15: '15 شيكل',
+        prize20: '20 شيكل',
+        prize25: '25 شيكل',
+        prize30: '30 شيكل',
+        prize35: '35 شيكل',
+        prize40: '40 شيكل',
+        prize45: '45 شيكل',
+        prize50: '50 شيكل'
     }
 };
 
-// ===== رابط Google Apps Script URL الذي أنشأته =====
+// ===== رابط Google Apps Script URL (لم يتغير) =====
 const googleAppsScriptURL = 'https://script.google.com/macros/s/AKfycbxZ7NtD5UqDnwiQzbqUNP4zpbWzA6NIGyBgzGiDGX_UK2xlZoHWNyKSaR6j_XFl0g/exec';
 
-// ===== تعريف القطاعات (مع تعديل جائزة الكوب والشمسية) =====
+// ===== تعريف القطاعات (العرض المرئي) =====
+// الكلاسات والألوان تعكس مجموعة من الجوائز لتبسيط العرض.
 const segments = [
-    { name: '50 شيكل', icon: '💵', class: 'win-50', startAngle: 0, endAngle: 72, stopAngle: 36 },
-    { name: '100 شيكل', icon: '💰', class: 'win-sunshade', startAngle: 72, endAngle: 144, stopAngle: 108 }, // مجرد منظر
-    { name: '25 شيكل', icon: '💵', class: 'win-25', startAngle: 144, endAngle: 216, stopAngle: 180 },
-    { name: 'Cup', icon: '🏆', class: 'win-cup', startAngle: 216, endAngle: 288, stopAngle: 252 }, 
-    { name: 'شمسية سيارة', icon: '🚗', class: 'win-sunshade', startAngle: 288, endAngle: 360, stopAngle: 324 }
+    { name: '💰 الكبرى', icon: '💰', class: 'win-50', startAngle: 0, endAngle: 72, stopAngle: 36, winnable: true },      
+    { name: '💵 المميزة', icon: '💵', class: 'win-40', startAngle: 72, endAngle: 144, stopAngle: 108, winnable: true },   
+    { name: '💸 الجيدة', icon: '💸', class: 'win-30', startAngle: 144, endAngle: 216, stopAngle: 180, winnable: true },    
+    { name: '🎁 المتوسطة', icon: '🎁', class: 'win-20', startAngle: 216, endAngle: 288, stopAngle: 252, winnable: true },   
+    { name: '🪙 الصغيرة', icon: '🪙', class: 'win-10', startAngle: 288, endAngle: 360, stopAngle: 324, winnable: true } 
 ];
 
 // ===== عناصر DOM =====
@@ -73,76 +91,81 @@ function createConfetti() {
     }
 }
 
-// ===== وظيفة بدء الدوران (اللوجيك الجديد لاختيار الجوائز المتاحة) =====
+// ===== وظيفة بدء الدوران (المنطق المعدل) =====
 function startSpin() {
     if (!validateInput()) return;
 
     spinBtn.disabled = true;
     resultDiv.style.display = 'none';
 
-    // فلترة القطاعات القابلة للربح فقط
-    const winnableSegments = segments.filter(segment => {
-        // جائزة 100 شيكل فقط منظر (لن يتم فوزها)
-        if (segment.name === '100 شيكل') return false;
-        
-        // التحقق من توافر الجوائز المحدودة
-        if (segment.name === '25 شيكل' && gameData.prizes.prize25 <= 0) return false;
-        if (segment.name === '50 شيكل' && gameData.prizes.prize50 <= 0) return false;
-        if (segment.name === 'Cup' && gameData.prizes.cup <= 0) return false; 
-        if (segment.name === 'شمسية سيارة' && gameData.prizes.sunShade <= 0) return false;
-        
-        return true;
-    });
+    // 1. تحديد الجائزة الفائزة من الجوائز المتبقية
+    let availablePrizes = [];
+    for (const prizeKey in gameData.prizes) {
+        // نكرر المفتاح بعدد الجوائز المتبقية
+        for (let i = 0; i < gameData.prizes[prizeKey]; i++) {
+            availablePrizes.push(prizeKey);
+        }
+    }
 
-    if (winnableSegments.length === 0) {
+    if (availablePrizes.length === 0) {
         showError('عذراً، لقد نفدت جميع الجوائز!');
         spinBtn.disabled = false;
         return;
     }
 
-    const selectedSegment = winnableSegments[Math.floor(Math.random() * winnableSegments.length)];
+    // يتم اختيار الجائزة بناءً على عددها المتبقي (احتمالية أعلى للجوائز ذات الكمية الأكبر)
+    const selectedPrizeKey = availablePrizes[Math.floor(Math.random() * availablePrizes.length)];
+    const selectedPrizeName = gameData.prizeMap[selectedPrizeKey];
 
+    // 2. توجيه العجلة لتقف عند قطاع يمثل هذه الجائزة (لغرض العرض المرئي)
+    let visualSegment;
+    // منطق توجيه تقريبي:
+    if (['prize45', 'prize50'].includes(selectedPrizeKey)) {
+        visualSegment = segments[0]; // الكبرى (50, 45)
+    } else if (['prize35', 'prize40'].includes(selectedPrizeKey)) {
+        visualSegment = segments[1]; // المميزة (40, 35)
+    } else if (['prize25', 'prize30'].includes(selectedPrizeKey)) {
+        visualSegment = segments[2]; // الجيدة (30, 25)
+    } else if (['prize20'].includes(selectedPrizeKey)) {
+        visualSegment = segments[3]; // المتوسطة (20)
+    } else if (['prize10', 'prize15'].includes(selectedPrizeKey)) {
+        visualSegment = segments[4]; // الصغيرة (15, 10)
+    } else {
+        // اختيار عشوائي إذا لم يتم التحديد
+        visualSegment = segments[Math.floor(Math.random() * segments.length)];
+    }
+    
+    // حساب زاوية الدوران لتقف عند القطاع المختار
     const baseRotations = 5 * 360;
-    const stopAngle = 360 - selectedSegment.stopAngle;
+    const stopAngle = 360 - visualSegment.stopAngle;
     const totalRotation = baseRotations + stopAngle;
+
+    // إضافة تغيير طفيف عشوائي (+/- 10 درجات) لجعل الوقوف يبدو واقعياً داخل القطاع
+    const randomOffset = Math.floor(Math.random() * 20) - 10;
+    const finalRotation = totalRotation + randomOffset;
 
     wheel.style.transition = 'none';
     wheel.style.transform = `rotate(5deg)`;
 
     setTimeout(() => {
         wheel.style.transition = 'transform 4s cubic-bezier(0.17,0.89,0.32,0.98)';
-        wheel.style.transform = `rotate(${totalRotation}deg)`;
+        wheel.style.transform = `rotate(${finalRotation}deg)`;
     }, 50);
 
     setTimeout(() => {
-        showResult(selectedSegment);
+        // عرض النتيجة الفعلية (اسم الجائزة من prizeMap)
+        showActualResult(selectedPrizeName, visualSegment.class, visualSegment.icon);
 
         const id = document.getElementById('playerId').value.trim();
         const phone = document.getElementById('playerPhone').value.trim();
-        const prize = selectedSegment.name;
         const timestamp = getGregorianNow();
 
         gameData.playedIds.add(id);
-        sendToGoogleSheets(id, phone, prize, timestamp);
+        sendToGoogleSheets(id, phone, selectedPrizeName, timestamp);
         
-        // تحديث عدد الجوائز المتبقية
-        switch(prize) {
-            case '25 شيكل':
-                gameData.prizes.prize25--;
-                createConfetti();
-                break;
-            case '50 شيكل':
-                gameData.prizes.prize50--;
-                createConfetti();
-                break;
-            case 'Cup':
-                gameData.prizes.cup--;
-                createConfetti();
-                break;
-            case 'شمسية سيارة':
-                gameData.prizes.sunShade--;
-                break;
-        }
+        // خصم الجائزة
+        gameData.prizes[selectedPrizeKey]--;
+        createConfetti(); // تفعيل المؤثر لكل فوز
 
         updateStats();
 
@@ -153,14 +176,15 @@ function startSpin() {
     }, 4200);
 }
 
-// عرض النتيجة
-function showResult(result) {
-    resultDiv.innerHTML = `${result.icon} ${result.name} ${result.icon}`;
-    resultDiv.className = `result ${result.class}`;
+// عرض النتيجة المعدلة لتعرض الجائزة الفعلية وليس اسم القطاع
+function showActualResult(prizeName, segmentClass, icon) {
+    // يمكننا استخدام أيقونة القطاع المرئي ولكن عرض اسم الجائزة الفعلي
+    resultDiv.innerHTML = `${icon} ${prizeName} ${icon}`;
+    resultDiv.className = `result ${segmentClass}`;
     resultDiv.style.display = 'flex';
 }
 
-// ===== تحديث الإحصائيات (مبسطة) =====
+// ===== تحديث الإحصائيات (لم يتغير) =====
 function updateStats() {
     document.getElementById('totalPlayers').textContent = gameData.playedIds.size;
     
@@ -171,7 +195,7 @@ function updateStats() {
     }
 }
 
-// ===== دالة لإرسال البيانات إلى Google Sheets (مُحسّنة) =====
+// ===== دالة الإرسال (بدون تغيير) =====
 function sendToGoogleSheets(id, phone, prize, timestamp) {
     const data = { id, phone, prize, timestamp };
     
